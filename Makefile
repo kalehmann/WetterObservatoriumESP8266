@@ -32,7 +32,7 @@ check: $(TEST_BINARY)
 	$(TEST_BINARY) --success
 
 clean:
-	rm -rf build/*
+	find build/ -mindepth 1 -not -path build/.gitignore | xargs -0 rm -rf
 	rm -rf $(TEST_BINARY)
 
 help:
