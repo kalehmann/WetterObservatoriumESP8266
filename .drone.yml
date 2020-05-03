@@ -1,0 +1,35 @@
+---
+kind: "pipeline"
+name: "default"
+
+steps:
+        - name: "pull submodules"
+          image: "registry.kalehmann.de/testing/wetterobservatoriumesp8266:latest"
+          commands:
+                - "git submodule update --init --recursive --remote"
+        - name: "install ESP8266 toolchain"
+          image: "registry.kalehmann.de/testing/wetterobservatoriumesp8266:latest"
+          commands:
+                - "cd vendor/esp8266/tools && python3 get.py"
+          depends_on:
+                - "pull submodules"
+        - name: "build"
+          image: "registry.kalehmann.de/testing/wetterobservatoriumesp8266:latest"
+          commands:
+                - "make build"
+          depends_on:
+                - "install ESP8266 toolchain"
+
+        - name: "unit tests"
+          image: "registry.kalehmann.de/testing/wetterobservatoriumesp8266:latest"
+          commands:
+                - "make check"
+          depends_on:
+                - "install ESP8266 toolchain"
+
+image_pull_secrets:
+        - "dockerconfigjson"
+...
+
+
+
