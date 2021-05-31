@@ -13,11 +13,7 @@ export ESP_ROOT
 export SKETCH
 
 SOURCES = \
-	WetterObservatoriumESP8266/WetterObservatoriumESP8266.ino \
-	WetterObservatoriumESP8266/src/sds011/SDS011.cpp \
-	WetterObservatoriumESP8266/src/sds011/SDS011.hpp \
-	WetterObservatoriumESP8266/src/sds011/SDS011DataPacket.cpp \
-	WetterObservatoriumESP8266/src/sds011/SDS011DataPacket.hpp
+	WetterObservatoriumESP8266/WetterObservatoriumESP8266.ino
 
 TEST_BINARY = tests/check
 TEST_SOURCES = tests/main.cpp
