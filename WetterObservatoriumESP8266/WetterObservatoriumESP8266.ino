@@ -16,11 +16,17 @@
 
 
 #include <Arduino.h>
+#include <ESP8266WiFi.h>
 
 void setup() {
         Serial.begin(9600);
+	// Connect to WiFi
+	WiFi.begin(WIFI_SSID, WIFI_PASS);
+	while (WiFi.status() != WL_CONNECTED) {
+	    delay(500);
+	    Serial.print("*");
+	}
 }
 
 void loop() {
-        //
 }
