@@ -1,12 +1,12 @@
 [submodule "vendor/catch2"]
 	path = vendor/catch2
 	url = https://github.com/catchorg/Catch2.git
-[submodule "vendor/DHT-sensor-library"]
-	path = vendor/DHT-sensor-library
-	url = git@github.com:adafruit/DHT-sensor-library.git
 [submodule "vendor/esp8266"]
 	path = vendor/esp8266
 	url = https://github.com/esp8266/Arduino.git
 [submodule "vendor/makeEspArduino"]
 	path = vendor/makeEspArduino
 	url = https://github.com/plerup/makeEspArduino.git
+[submodule "vendor/SimpleDHT"]
+	path = vendor/SimpleDHT
+	url = https://github.com/winlinvip/SimpleDHT.git
