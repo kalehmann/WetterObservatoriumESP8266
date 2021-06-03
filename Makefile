@@ -31,7 +31,10 @@ clean:
 	find build/ -mindepth 1 -not -path build/.gitignore | xargs rm -rf
 	rm -rf $(TEST_BINARY)
 
+flash:
+	$(MAKE) -f $(MAKEFILE) flash
+
 help:
 	$(MAKE) -f $(MAKEFILE) help
 
-.PHONY: build check clean help
+.PHONY: build check clean flash help
