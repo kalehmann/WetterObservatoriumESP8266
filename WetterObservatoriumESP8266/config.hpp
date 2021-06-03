@@ -1,5 +1,5 @@
 /* WetterObservatoriumESP8266
-   Copyright (C) 2020 Karsten Lehmann <mail@kalehmann.de>
+   Copyright (C) 2021 Karsten Lehmann <mail@kalehmann.de>
 
    This program is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -14,20 +14,16 @@
    along with this program; see the file LICENSE.  If not see
    <http://www.gnu.org/licenses/>.  */
 
+#ifndef WETTEROBSERVATORIUMESP8266_CONFIG_HPP_
+#define WETTEROBSERVATORIUMESP8266_CONFIG_HPP_
 
-#include <Arduino.h>
-#include "config.hpp"
-#include <ESP8266WiFi.h>
+static const char* WIFI_SSID = "MY MIFI SSID";
 
-void setup() {
-        Serial.begin(9600);
-	// Connect to WiFi
-	WiFi.begin(WIFI_SSID, WIFI_PASS);
-	while (WiFi.status() != WL_CONNECTED) {
-	    delay(500);
-	    Serial.print("*");
-	}
-}
+static const char* WIFI_PASS = "*****";
 
-void loop() {
-}
+static const char* API_HOST = "http://blumenwetter.kalehmann.de";
+
+static const char* API_KEY = "*****";
+
+#endif  // WETTEROBSERVATORIUMESP8266_CONFIG_HPP_
+
