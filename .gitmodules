@@ -1,3 +1,9 @@
+[submodule "vendor/ADS1115_WE"]
+	path = vendor/ADS1115_WE
+	url = https://github.com/wollewald/ADS1115_WE.git
+[submodule "vendor/BME280"]
+	path = vendor/BME280
+	url = https://github.com/finitespace/BME280.git
 [submodule "vendor/catch2"]
 	path = vendor/catch2
 	url = https://github.com/catchorg/Catch2.git
