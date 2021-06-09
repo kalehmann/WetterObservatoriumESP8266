@@ -1,3 +1,4 @@
+BUILD_EXTRA_FLAGS=-DWITH_SERIAL_OUTPUT
 THIS_DIR := $(realpath $(dir $(realpath $(lastword $(MAKEFILE_LIST)))))
 ROOT := $(THIS_DIR)/..
 LIBS =  \
