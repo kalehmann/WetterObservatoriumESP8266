@@ -1,6 +1,9 @@
 [submodule "vendor/ADS1115_WE"]
 	path = vendor/ADS1115_WE
 	url = https://github.com/wollewald/ADS1115_WE.git
+[submodule "vendor/arduino-crypt"]
+	path = vendor/arduino-crypt
+	url = https://github.com/intrbiz/arduino-crypto.git
 [submodule "vendor/BME280"]
 	path = vendor/BME280
 	url = https://github.com/finitespace/BME280.git
