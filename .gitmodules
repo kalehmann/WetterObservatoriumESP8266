@@ -16,6 +16,9 @@
 [submodule "vendor/makeEspArduino"]
 	path = vendor/makeEspArduino
 	url = https://github.com/plerup/makeEspArduino.git
+[submodule "vendor/NTPClient"]
+	path = vendor/NTPClient
+	url = https://github.com/arduino-libraries/NTPClient.git
 [submodule "vendor/SimpleDHT"]
 	path = vendor/SimpleDHT
 	url = https://github.com/winlinvip/SimpleDHT.git
