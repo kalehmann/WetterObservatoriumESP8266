@@ -19,14 +19,20 @@
 #include <BME280I2C.h>
 #include "config.hpp"
 #include <ESP8266WiFi.h>
+#include <NTPClient.h>
 #include <SimpleDHT.h>
 #include <stdnoreturn.h>
+#include <time.h>
+#include <WiFiUdp.h>
 #include <Wire.h>
 
 ADS1115_WE adc = ADS1115_WE(0x48);
 BME280I2C bmp;
 SimpleDHT22 dht22(14);
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP);
 
+String dateHeader(void);
 _Noreturn void fail(void);
 #ifdef WITH_SERIAL_OUTPUT
 #define DEBUG_SERIAL(val) do{ Serial.print(val); } while( false )
@@ -108,6 +114,37 @@ void loop(void)
 	DEBUG_SERIAL("Sun: ");
 	DEBUG_SERIAL(voltage / 3000 * 100);
 	DEBUG_SERIAL(" %\n");
+	timeClient.update();
+	Serial.println(dateHeader());
+}
+
+String dateHeader(void)
+{
+        static String day_names[7] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+        time_t rawtime;
+	struct tm *info;
+	rawtime = timeClient.getEpochTime();
+	info = gmtime(&rawtime);
+	String daysStr = info->tm_mday < 10
+	  ? "0" + String(info->tm_mday)
+	  : String(info->tm_mday);
+	String monthsStr = info->tm_mon < 9
+	  ? "0" + String(info->tm_mon + 1)
+	  : String(info->tm_mon + 1);
+	String yearsStr = String(info->tm_year + 1900);
+	String hoursStr = info->tm_hour < 10
+	  ? "0" + String(info->tm_hour)
+	  : String(info->tm_hour);
+	String minuteStr = info->tm_min < 10
+	  ? "0" + String(info->tm_min)
+	  : String(info->tm_min);
+	String secondStr = info->tm_sec < 10
+	  ? "0" + String(info->tm_sec)
+	  : String(info->tm_sec);
+
+	return day_names[info->tm_wday] + ", " + daysStr + " " + monthsStr +
+	  " " + yearsStr + " " + hoursStr + ":" + minuteStr + ":" + secondStr
+	  + " GMT";
 }
 
 _Noreturn void fail(void)
