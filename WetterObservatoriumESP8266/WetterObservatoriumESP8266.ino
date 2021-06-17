@@ -171,12 +171,14 @@ void sendData(void)
 	String toSign = String("date: ") + date + "\n" + body;
 	String hmac = experimental::crypto::SHA256::hmac(toSign, API_KEY, sizeof(API_KEY), 32);
 
-        http.begin(client, API_HOST, 8080, path, false);
-	http.addHeader("Content-Type", "application/json");
-	http.addHeader("Date", dateHeader());
-	http.addHeader("Authorization", "hmac username=\"test\", algorithm=\"sha256\", headers=\"date\", signature=\"" + String(hmac.c_str()) + "\"");
-	http.POST(body);
-	http.end();
+	if ((WiFi.status() == WL_CONNECTED)) {
+                http.begin(client, API_HOST, 8080, path, false);
+		http.addHeader("Content-Type", "application/json");
+		http.addHeader("Date", dateHeader());
+		http.addHeader("Authorization", "hmac username=\"test\", algorithm=\"sha256\", headers=\"date\", signature=\"" + String(hmac.c_str()) + "\"");
+		http.POST(body);
+		http.end();
+	}
 }
 
 _Noreturn void fail(void)
