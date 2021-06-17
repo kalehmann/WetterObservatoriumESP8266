@@ -176,7 +176,16 @@ void sendData(void)
 		http.addHeader("Content-Type", "application/json");
 		http.addHeader("Date", dateHeader());
 		http.addHeader("Authorization", "hmac username=\"test\", algorithm=\"sha256\", headers=\"date\", signature=\"" + String(hmac.c_str()) + "\"");
-		http.POST(body);
+		int httpCode = http.POST(body);
+		if (httpCode > 0) {
+		        if (httpCode == HTTP_CODE_OK) {
+			        DEBUG_SERIAL("Data successfully sended\n");
+		        } else {
+			        DEBUG_SERIAL("Server error: HTTP code " + String(httpCode));
+		        }
+		} else {
+		        DEBUG_SERIAL("HTTP POST failed: " + http.errorToString(httpCode));
+		}
 		http.end();
 	}
 }
