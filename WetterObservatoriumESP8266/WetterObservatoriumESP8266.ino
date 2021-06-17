@@ -18,6 +18,7 @@
 #include <Arduino.h>
 #include <BME280I2C.h>
 #include "config.hpp"
+#include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
 #include <NTPClient.h>
 #include <SimpleDHT.h>
@@ -25,13 +26,16 @@
 #include <time.h>
 #include <WiFiUdp.h>
 #include <Wire.h>
+#include "Crypto.h"
 
 ADS1115_WE adc = ADS1115_WE(0x48);
 BME280I2C bmp;
 SimpleDHT22 dht22(14);
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
+WiFiClient client;
 
+void sendData(void);
 String dateHeader(void);
 _Noreturn void fail(void);
 #ifdef WITH_SERIAL_OUTPUT
@@ -79,43 +83,14 @@ void setup(void)
 	}
 	DEBUG_SERIAL("\n");
 	adc.setVoltageRange_mV(ADS1115_RANGE_4096);
+	timeClient.begin();
 }
 
 void loop(void)
 {
         delay(3000);
-	float bmp_temp(NAN), bmp_hum(NAN), bmp_pres(NAN), voltage(0);
-	byte dht_hum(0), dht_temp(0);
-	BME280::TempUnit tempUnit(BME280::TempUnit_Celsius);
-	BME280::PresUnit presUnit(BME280::PresUnit_Pa);
-	int err = dht22.read(&dht_temp, &dht_hum, NULL);
-	if (SimpleDHTErrSuccess != err) {
-		DEBUG_SERIAL("Read DHT22 failed, err=");
-		DEBUG_SERIAL(SimpleDHTErrCode(err));
-		DEBUG_SERIAL(",");
-		DEBUG_SERIAL(SimpleDHTErrDuration(err));
-	}
-	bmp.read(bmp_pres, bmp_temp, bmp_hum, tempUnit, presUnit);
-	adc.setCompareChannels(ADS1115_COMP_0_GND);
-	adc.startSingleMeasurement();
-	while(adc.isBusy()) {}
-	voltage = adc.getResult_mV();
-
-	DEBUG_SERIAL("\nDHT22     Temp: ");
-	DEBUG_SERIAL(dht_temp);
-	DEBUG_SERIAL(" C Humidity ");
-	DEBUG_SERIAL(dht_hum);
-	DEBUG_SERIAL(" %\n");
-	DEBUG_SERIAL("BMP280    Temp: ");
-	DEBUG_SERIAL(bmp_temp);
-	DEBUG_SERIAL(" C Pressure: ");
-	DEBUG_SERIAL(bmp_pres / 1000);
-	DEBUG_SERIAL(" kPa\n");
-	DEBUG_SERIAL("Sun: ");
-	DEBUG_SERIAL(voltage / 3000 * 100);
-	DEBUG_SERIAL(" %\n");
 	timeClient.update();
-	Serial.println(dateHeader());
+	sendData();
 }
 
 String dateHeader(void)
@@ -147,13 +122,70 @@ String dateHeader(void)
 	  + " GMT";
 }
 
+String postBody(void)
+{
+        float bmp_temp(NAN), bmp_hum(NAN), bmp_pres(NAN), voltage(0);
+	byte dht_hum(0), dht_temp(0);
+	BME280::TempUnit tempUnit(BME280::TempUnit_Celsius);
+	BME280::PresUnit presUnit(BME280::PresUnit_Pa);
+	int err = dht22.read(&dht_temp, &dht_hum, NULL);
+	if (SimpleDHTErrSuccess != err) {
+		DEBUG_SERIAL("Read DHT22 failed, err=");
+		DEBUG_SERIAL(SimpleDHTErrCode(err));
+		DEBUG_SERIAL(",");
+		DEBUG_SERIAL(SimpleDHTErrDuration(err));
+	}
+	bmp.read(bmp_pres, bmp_temp, bmp_hum, tempUnit, presUnit);
+	adc.setCompareChannels(ADS1115_COMP_0_GND);
+	adc.startSingleMeasurement();
+	while(adc.isBusy()) {}
+	voltage = adc.getResult_mV();
+
+	DEBUG_SERIAL("\nDHT22     Temp: ");
+	DEBUG_SERIAL(dht_temp);
+	DEBUG_SERIAL(" C Humidity ");
+	DEBUG_SERIAL(dht_hum);
+	DEBUG_SERIAL(" %\n");
+	DEBUG_SERIAL("BMP280    Temp: ");
+	DEBUG_SERIAL(bmp_temp);
+	DEBUG_SERIAL(" C Pressure: ");
+	DEBUG_SERIAL(bmp_pres / 1000);
+	DEBUG_SERIAL(" kPa\n");
+	DEBUG_SERIAL("Sun: ");
+	DEBUG_SERIAL(voltage / 3000 * 100);
+	DEBUG_SERIAL(" %\n");
+
+	return String(
+	        "{\"temperature\": ") + String(dht_temp) +
+	        ", \"sun\": " + String((int)(voltage / 30 * 10)) +
+	        ", \"pressure\": " + String((int)(bmp_pres * 10)) +
+	        "}";
+}
+
+void sendData(void)
+{
+        HTTPClient http;
+        String path = String("/api/test");
+	String body = postBody();
+	String date = dateHeader();
+	String toSign = String("date: ") + date + "\n" + body;
+	String hmac = experimental::crypto::SHA256::hmac(toSign, API_KEY, sizeof(API_KEY), 32);
+
+        http.begin(client, API_HOST, 8080, path, false);
+	http.addHeader("Content-Type", "application/json");
+	http.addHeader("Date", dateHeader());
+	http.addHeader("Authorization", "hmac username=\"test\", algorithm=\"sha256\", headers=\"date\", signature=\"" + String(hmac.c_str()) + "\"");
+	http.POST(body);
+	http.end();
+}
+
 _Noreturn void fail(void)
 {
 	// Perform some random blinknig of the builtin LED to indicate a
 	// failure.
 	pinMode(LED_BUILTIN, OUTPUT);
 	for (unsigned int i = 0; i < 16; i++) {
-	        digitalWrite(LED_BUILTIN, HIGH);
+	  // digitalWrite(LED_BUILTIN, HIGH);
 		delay(600);
 		digitalWrite(LED_BUILTIN, LOW);
 		delay(600);
