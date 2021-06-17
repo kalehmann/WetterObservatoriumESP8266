@@ -31,6 +31,7 @@
 ADS1115_WE adc = ADS1115_WE(0x48);
 BME280I2C bmp;
 SimpleDHT22 dht22(14);
+HTTPClient http;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
 WiFiClient client;
@@ -164,7 +165,6 @@ String postBody(void)
 
 void sendData(void)
 {
-        HTTPClient http;
         String path = String("/api/test");
 	String body = postBody();
 	String date = dateHeader();
