@@ -175,7 +175,7 @@ void sendData(void)
 	String body = postBody();
 	String date = dateHeader();
 	String toSign = String("date: ") + date + "\n" + body;
-	String hmac = experimental::crypto::SHA256::hmac(toSign, API_KEY, sizeof(API_KEY), 32);
+	String hmac = experimental::crypto::SHA256::hmac(toSign, API_KEY, strlen(API_KEY), 32);
 
 	if ((WiFi.status() == WL_CONNECTED)) {
                 http.begin(client, API_HOST, API_PORT, path, false);
