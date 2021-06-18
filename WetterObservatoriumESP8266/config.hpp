@@ -21,9 +21,14 @@ static const char* WIFI_SSID = "MY MIFI SSID";
 
 static const char* WIFI_PASS = "*****";
 
-static const char* API_HOST = "http://blumenwetter.kalehmann.de";
+static const char* API_HOST = "blumenwetter.kalehmann.de";
+
+static const uint16_t API_PORT = 80;
 
 static const char* API_KEY = "*****";
 
-#endif  // WETTEROBSERVATORIUMESP8266_CONFIG_HPP_
+static const char* LOCATION = "outdoor";
 
+static const unsigned long MEASURE_INTERVAL = 5 * 60;
+
+#endif  // WETTEROBSERVATORIUMESP8266_CONFIG_HPP_

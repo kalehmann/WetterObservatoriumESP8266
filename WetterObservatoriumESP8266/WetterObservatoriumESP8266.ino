@@ -35,6 +35,7 @@ HTTPClient http;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
 WiFiClient client;
+unsigned long previousMeasurement = 0;
 
 void sendData(void);
 String dateHeader(void);
@@ -89,7 +90,12 @@ void setup(void)
 
 void loop(void)
 {
-        delay(3000);
+        unsigned long now = millis();
+	if (previousMeasurement != 0
+	    && now - previousMeasurement < MEASURE_INTERVAL * 1000) {
+	        return;
+	}
+	previousMeasurement = now;
 	timeClient.update();
 	sendData();
 }
@@ -165,14 +171,14 @@ String postBody(void)
 
 void sendData(void)
 {
-        String path = String("/api/test");
+        String path = String("/api/") + LOCATION;
 	String body = postBody();
 	String date = dateHeader();
 	String toSign = String("date: ") + date + "\n" + body;
 	String hmac = experimental::crypto::SHA256::hmac(toSign, API_KEY, sizeof(API_KEY), 32);
 
 	if ((WiFi.status() == WL_CONNECTED)) {
-                http.begin(client, API_HOST, 8080, path, false);
+                http.begin(client, API_HOST, API_PORT, path, false);
 		http.addHeader("Content-Type", "application/json");
 		http.addHeader("Date", dateHeader());
 		http.addHeader("Authorization", "hmac username=\"test\", algorithm=\"sha256\", headers=\"date\", signature=\"" + String(hmac.c_str()) + "\"");
