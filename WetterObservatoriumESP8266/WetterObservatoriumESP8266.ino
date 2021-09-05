@@ -37,6 +37,8 @@ NTPClient timeClient(ntpUDP);
 WiFiClient client;
 unsigned long previousMeasurement = 0;
 
+bool has_adc{true}, has_bmp{true};
+
 void sendData(void);
 String dateHeader(void);
 _Noreturn void fail(void);
@@ -75,13 +77,14 @@ void setup(void)
 		delay(1000);
 		if (0 == bmp_retries--) {
 		        DEBUG_SERIAL("No BMP280 connected\n");
-			fail();
+			has_bmp = false;
+			break;
 		}
 	}
 	DEBUG_SERIAL("\nConnecting to ADS1115 ADC ");
 	if(!adc.init()) {
 	        DEBUG_SERIAL("No ADS1115 connected!\n");
-		fail();
+		has_adc = false;
 	}
 	DEBUG_SERIAL("\n");
 	adc.setVoltageRange_mV(ADS1115_RANGE_4096);
@@ -131,42 +134,62 @@ String dateHeader(void)
 
 String postBody(void)
 {
+        bool has_dht{true};
         float bmp_temp(NAN), bmp_hum(NAN), bmp_pres(NAN), voltage(0);
 	byte dht_hum(0), dht_temp(0);
 	BME280::TempUnit tempUnit(BME280::TempUnit_Celsius);
-	BME280::PresUnit presUnit(BME280::PresUnit_Pa);
+	BME280::PresUnit presUnit(BME280::PresUnit_hPa);
 	int err = dht22.read(&dht_temp, &dht_hum, NULL);
+	String res = "{";
 	if (SimpleDHTErrSuccess != err) {
 		DEBUG_SERIAL("Read DHT22 failed, err=");
 		DEBUG_SERIAL(SimpleDHTErrCode(err));
 		DEBUG_SERIAL(",");
 		DEBUG_SERIAL(SimpleDHTErrDuration(err));
+		DEBUG_SERIAL("\n");
+		has_dht = false;
 	}
-	bmp.read(bmp_pres, bmp_temp, bmp_hum, tempUnit, presUnit);
-	adc.setCompareChannels(ADS1115_COMP_0_GND);
-	adc.startSingleMeasurement();
-	while(adc.isBusy()) {}
-	voltage = adc.getResult_mV();
+	if (has_bmp) {
+	        bmp.read(bmp_pres, bmp_temp, bmp_hum, tempUnit, presUnit);
+	}
+	if (has_adc) {
+	        adc.setCompareChannels(ADS1115_COMP_0_GND);
+		adc.startSingleMeasurement();
+		while(adc.isBusy()) {}
+		voltage = adc.getResult_mV();
+	}
 
-	DEBUG_SERIAL("\nDHT22     Temp: ");
-	DEBUG_SERIAL(dht_temp);
-	DEBUG_SERIAL(" C Humidity ");
-	DEBUG_SERIAL(dht_hum);
-	DEBUG_SERIAL(" %\n");
-	DEBUG_SERIAL("BMP280    Temp: ");
-	DEBUG_SERIAL(bmp_temp);
-	DEBUG_SERIAL(" C Pressure: ");
-	DEBUG_SERIAL(bmp_pres / 1000);
-	DEBUG_SERIAL(" kPa\n");
-	DEBUG_SERIAL("Sun: ");
-	DEBUG_SERIAL(voltage / 3000 * 100);
-	DEBUG_SERIAL(" %\n");
+	if (has_dht) {
+	        DEBUG_SERIAL("\nDHT22     Temp: ");
+		DEBUG_SERIAL(dht_temp);
+		DEBUG_SERIAL(" C Humidity ");
+		DEBUG_SERIAL(dht_hum);
+		DEBUG_SERIAL(" %\n");
+		res = res + "\"humidity\": " + String(dht_hum);
+	}
+	if (has_bmp) {
+	        DEBUG_SERIAL("BMP280    Temp: ");
+		DEBUG_SERIAL(bmp_temp);
+		DEBUG_SERIAL(" C Pressure: ");
+		DEBUG_SERIAL(bmp_pres);
+		DEBUG_SERIAL(" hPa\n");
+		if (has_dht) {
+		        res = res + ",";
+		}
+		res = res + "\"temperature\": " + String(bmp_temp) +
+		        ", \"pressure\": " + String(bmp_pres);
+	}
+	if (has_adc) {
+	        DEBUG_SERIAL("Sun: ");
+		DEBUG_SERIAL(voltage / 3000 * 100);
+		DEBUG_SERIAL(" %\n");
+		if (has_dht || has_bmp) {
+		        res = res + ",";
+		}
+		res = res + "\"sun\": " + String(voltage / 3600 * 100);
+	}
 
-	return String(
-	        "{\"temperature\": ") + String(dht_temp) +
-	        ", \"sun\": " + String((int)(voltage / 30 * 10)) +
-	        ", \"pressure\": " + String((int)(bmp_pres * 10)) +
-	        "}";
+	return res + "}";
 }
 
 void sendData(void)
