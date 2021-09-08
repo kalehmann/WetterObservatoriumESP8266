@@ -36,5 +36,5 @@ python get.py
 
 Run `make build`
 
-  [config_header]: WetterObservatoriumWeb/config.hpp
+  [config_header]: WetterObservatoriumESP8266/config.hpp
   [git_wo]: https://github.com/kalehmann/WetterObservatoriumWeb
