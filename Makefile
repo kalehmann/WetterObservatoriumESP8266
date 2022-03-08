@@ -3,7 +3,7 @@ CC_FLAGS=-std=c++11 -Wall
 CC_TEST_FLAGS=-I vendor/catch2/single_include
 
 ## makeEspArduino specific stuff
-BUILD_DIR=build/
+BUILD_DIR=build
 ESP_ROOT=vendor/esp8266
 MAKEFILE=vendor/makeEspArduino/makeEspArduino.mk
 SKETCH=WetterObservatoriumESP8266/WetterObservatoriumESP8266.ino
