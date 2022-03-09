@@ -1,0 +1,30 @@
+---
+on: "push"  # yamllint disable-line rule:truthy
+
+jobs:
+        build:
+                runs-on: "ubuntu-latest"
+                name: "Build the site"
+                steps:
+                        - uses: "actions/checkout@v2"
+                          with:
+                                  submodules: "recursive"
+                        - uses: "actions/setup-python@v2"
+                          with:
+                                  python-version: "3.x"
+                        - name: "Setup ESP8266"
+                          run: "cd vendor/esp8266/tools && python get.py"
+                        - name: "Build the project"
+                          run: "make build"
+        yaml-analysis:
+                runs-on: "ubuntu-latest"
+                steps:
+                        - uses: "actions/checkout@v2"
+                        - name: "Set up Python"
+                          uses: "actions/setup-python@v2"
+                          with:
+                                  python-version: "3.x"
+                        - name: "Install yamllint"
+                          run: "pip install yamllint"
+                        - name: "Lint YAML files"
+                          run: "yamllint --format=standard ."
