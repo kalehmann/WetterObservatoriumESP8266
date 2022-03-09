@@ -1,5 +1,7 @@
 ## WetterObservatoriumESP8266
 
+[![GitHub action status][github_badge]][github_action]
+
 This repository contains the code for an ESP8266 to communicate with the
 [WeatherObservatorium][git_wo].
 
@@ -38,3 +40,5 @@ Run `make build`
 
   [config_header]: WetterObservatoriumESP8266/config.hpp
   [git_wo]: https://github.com/kalehmann/WetterObservatoriumWeb
+  [github_action]: https://github.com/kalehmann/WetterObservatoriumESP8266/actions/workflows/main.yaml/
+  [github_badge]: https://github.com/kalehmann/WetterObservatoriumESP8266/actions/workflows/main.yaml/badge.svg
