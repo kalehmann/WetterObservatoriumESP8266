@@ -4,32 +4,29 @@ name: "default"
 
 steps:
         - name: "pull submodules"
-          image: "registry.kalehmann.de/testing/wetterobservatoriumesp8266:latest"
+          image: "registry.kalehmann.de/testing/wetterobservatoriumesp8266:latest"  # yamllint disable-line rule:line-length
           commands:
-                - "git submodule update --init --recursive --remote"
+                  - "git submodule update --init --recursive --remote"
         - name: "install ESP8266 toolchain"
-          image: "registry.kalehmann.de/testing/wetterobservatoriumesp8266:latest"
+          image: "registry.kalehmann.de/testing/wetterobservatoriumesp8266:latest"  # yamllint disable-line rule:line-length
           commands:
-                - "cd vendor/esp8266/tools && python3 get.py"
+                  - "cd vendor/esp8266/tools && python3 get.py"
           depends_on:
-                - "pull submodules"
+                  - "pull submodules"
         - name: "build"
-          image: "registry.kalehmann.de/testing/wetterobservatoriumesp8266:latest"
+          image: "registry.kalehmann.de/testing/wetterobservatoriumesp8266:latest"  # yamllint disable-line rule:line-length
           commands:
-                - "make build"
+                  - "make build"
           depends_on:
-                - "install ESP8266 toolchain"
+                  - "install ESP8266 toolchain"
 
         - name: "unit tests"
-          image: "registry.kalehmann.de/testing/wetterobservatoriumesp8266:latest"
+          image: "registry.kalehmann.de/testing/wetterobservatoriumesp8266:latest"  # yamllint disable-line rule:line-length
           commands:
-                - "make check"
+                  - "make check"
           depends_on:
-                - "install ESP8266 toolchain"
+                  - "install ESP8266 toolchain"
 
 image_pull_secrets:
         - "dockerconfigjson"
 ...
-
-
-
