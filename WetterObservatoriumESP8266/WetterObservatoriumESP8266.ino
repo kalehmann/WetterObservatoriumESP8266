@@ -14,10 +14,11 @@
    along with this program; see the file LICENSE.  If not see
    <http://www.gnu.org/licenses/>.  */
 
-#include<ADS1115_WE.h>
+#include <ADS1115_WE.h>
 #include <Arduino.h>
 #include <BME280I2C.h>
 #include "config.hpp"
+#include <Crypto.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
 #include <NTPClient.h>
@@ -26,7 +27,6 @@
 #include <time.h>
 #include <WiFiUdp.h>
 #include <Wire.h>
-#include "Crypto.h"
 
 ADS1115_WE adc = ADS1115_WE(0x48);
 BME280I2C bmp;
