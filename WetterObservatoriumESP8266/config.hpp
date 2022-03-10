@@ -21,7 +21,7 @@ static const char* WIFI_SSID = "MY MIFI SSID";
 
 static const char* WIFI_PASS = "*****";
 
-static const char* API_HOST = "blumenwetter.kalehmann.de";
+static const char* API_HOST = "alaunwetter.kalehmann.de";
 
 static const uint16_t API_PORT = 80;
 
