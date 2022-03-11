@@ -14,6 +14,9 @@
    along with this program; see the file LICENSE.  If not see
    <http://www.gnu.org/licenses/>.  */
 
+#include <stdnoreturn.h>
+#include <time.h>
+
 #include <ADS1115_WE.h>
 #include <Arduino.h>
 #include <BME280I2C.h>
@@ -23,8 +26,6 @@
 #include <ESP8266WiFi.h>
 #include <NTPClient.h>
 #include <SimpleDHT.h>
-#include <stdnoreturn.h>
-#include <time.h>
 #include <WiFiUdp.h>
 #include <Wire.h>
 
@@ -43,9 +44,9 @@ void sendData(void);
 String dateHeader(void);
 _Noreturn void fail(void);
 #ifdef WITH_SERIAL_OUTPUT
-#define DEBUG_SERIAL(val) do{ Serial.print(val); } while( false )
+#define DEBUG_SERIAL(val) do { Serial.print(val); } while ( false )
 #else
-#define DEBUG_SERIAL(val) do{ } while ( false )
+#define DEBUG_SERIAL(val) do { } while ( false )
 #endif
 #define LED_BUILTIN 16
 
@@ -75,7 +76,7 @@ void setup(void)
         Wire.begin();
 
         DEBUG_SERIAL("\nConnecting to BMP280 pressure sensor ");
-        while(!bmp.begin()) {
+        while (!bmp.begin()) {
                 DEBUG_SERIAL("*");
                 delay(1000);
                 if (0 == bmp_retries--) {
@@ -85,7 +86,7 @@ void setup(void)
                 }
         }
         DEBUG_SERIAL("\nConnecting to ADS1115 ADC ");
-        if(!adc.init()) {
+        if (!adc.init()) {
                 DEBUG_SERIAL("No ADS1115 connected!\n");
                 has_adc = false;
         }
@@ -108,7 +109,8 @@ void loop(void)
 
 String dateHeader(void)
 {
-        static String day_names[7] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+        static String day_names[7] = {"Mon", "Tue", "Wed", "Thu", "Fri",
+                        "Sat", "Sun"};
         time_t rawtime;
         struct tm *info;
         rawtime = timeClient.getEpochTime();
@@ -159,7 +161,7 @@ String postBody(void)
         if (has_adc) {
                 adc.setCompareChannels(ADS1115_COMP_0_GND);
                 adc.startSingleMeasurement();
-                while(adc.isBusy()) {}
+                while (adc.isBusy()) {}
                 voltage = adc.getResult_mV();
         }
 
@@ -207,22 +209,28 @@ void sendData(void)
         String body = postBody();
         String date = dateHeader();
         String toSign = String("date: ") + date + "\n" + body;
-        String hmac = experimental::crypto::SHA256::hmac(toSign, API_KEY, strlen(API_KEY), 32);
+        String hmac = experimental::crypto::SHA256::hmac(toSign, API_KEY,
+                                                         strlen(API_KEY), 32);
 
         if ((WiFi.status() == WL_CONNECTED)) {
                 http.begin(client, API_HOST, API_PORT, path, false);
                 http.addHeader("Content-Type", "application/json");
                 http.addHeader("Date", dateHeader());
-                http.addHeader("Authorization", "hmac username=\"test\", algorithm=\"sha256\", headers=\"date\", signature=\"" + String(hmac.c_str()) + "\"");
+                http.addHeader("Authorization",
+                               "hmac username=\"test\", algorithm=\"sha256\", "
+                               "headers=\"date\", signature=\"" +
+                               String(hmac.c_str()) + "\"");
                 int httpCode = http.POST(body);
                 if (httpCode > 0) {
                         if (httpCode == HTTP_CODE_OK) {
                                 DEBUG_SERIAL("Data successfully sended\n");
                         } else {
-                                DEBUG_SERIAL("Server error: HTTP code " + String(httpCode));
+                                DEBUG_SERIAL("Server error: HTTP code " +
+                                             String(httpCode));
                         }
                 } else {
-                        DEBUG_SERIAL("HTTP POST failed: " + http.errorToString(httpCode));
+                        DEBUG_SERIAL("HTTP POST failed: " +
+                                     http.errorToString(httpCode));
                 }
                 http.end();
         }
