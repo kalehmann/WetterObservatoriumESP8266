@@ -143,6 +143,7 @@ String postBody(void)
 	BME280::TempUnit tempUnit(BME280::TempUnit_Celsius);
 	BME280::PresUnit presUnit(BME280::PresUnit_hPa);
 	int err = dht22.read(&dht_temp, &dht_hum, NULL);
+	long rssi(0);
 	String res = "{";
 	if (SimpleDHTErrSuccess != err) {
 		DEBUG_SERIAL("Read DHT22 failed, err=");
@@ -191,6 +192,11 @@ String postBody(void)
 		}
 		res = res + "\"sun\": " + String(voltage / 3600 * 100);
 	}
+	rssi = WiFi.RSSI();
+	if (has_dht || has_bmp || has_adc) {
+		res = res + ",";
+	}
+	res = res + "\"rssi\": " + String(rssi);
 
 	return res + "}";
 }
