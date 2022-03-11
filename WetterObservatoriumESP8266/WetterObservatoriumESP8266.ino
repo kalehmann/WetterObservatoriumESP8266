@@ -68,6 +68,9 @@ void setup(void)
 	DEBUG_SERIAL(" - Success\n");
 	DEBUG_SERIAL("IP address : ");
 	DEBUG_SERIAL(WiFi.localIP());
+	// Automatically reconnect to WiFi on connection loss
+        WiFi.setAutoReconnect(true);
+        WiFi.persistent(true);
 
 	Wire.begin();
 
