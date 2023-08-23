@@ -5,6 +5,7 @@
 	path = vendor/BME280
 	url = https://github.com/finitespace/BME280.git
 [submodule "vendor/catch2"]
+	branch = v2.x
 	path = vendor/catch2
 	url = https://github.com/catchorg/Catch2.git
 [submodule "vendor/esp8266"]
