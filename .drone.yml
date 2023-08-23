@@ -1,32 +1,33 @@
 ---
-kind: "pipeline"
-name: "default"
+kind: 'pipeline'
+name: 'default'
+type: 'docker'
 
 steps:
-        - name: "pull submodules"
-          image: "registry.kalehmann.de/testing/wetterobservatoriumesp8266:latest"  # yamllint disable-line rule:line-length
-          commands:
-                  - "git submodule update --init --recursive --remote"
-        - name: "install ESP8266 toolchain"
-          image: "registry.kalehmann.de/testing/wetterobservatoriumesp8266:latest"  # yamllint disable-line rule:line-length
-          commands:
-                  - "cd vendor/esp8266/tools && python3 get.py"
-          depends_on:
-                  - "pull submodules"
-        - name: "build"
-          image: "registry.kalehmann.de/testing/wetterobservatoriumesp8266:latest"  # yamllint disable-line rule:line-length
-          commands:
-                  - "make build"
-          depends_on:
-                  - "install ESP8266 toolchain"
+    - name: 'pull submodules'
+      image: 'git.kalehmann.de/infrastructure/dockerimages/git'
+      commands:
+          - 'git submodule update --init --recursive --remote'
+    - name: 'install ESP8266 toolchain'
+      image: 'git.kalehmann.de/karsten/wetterobservatoriumesp8266'
+      commands:
+          - 'cd vendor/esp8266/tools && python3 get.py'
+      depends_on:
+          - 'pull submodules'
+    - name: 'build'
+      image: 'git.kalehmann.de/karsten/wetterobservatoriumesp8266'
+      commands:
+          - 'make build'
+      depends_on:
+          - 'install ESP8266 toolchain'
 
-        - name: "unit tests"
-          image: "registry.kalehmann.de/testing/wetterobservatoriumesp8266:latest"  # yamllint disable-line rule:line-length
-          commands:
-                  - "make check"
-          depends_on:
-                  - "install ESP8266 toolchain"
+    - name: 'unit tests'
+      image: 'git.kalehmann.de/karsten/wetterobservatoriumesp8266'
+      commands:
+          - 'make check'
+      depends_on:
+          - 'install ESP8266 toolchain'
 
 image_pull_secrets:
-        - "dockerconfigjson"
+    - 'dockerconfigjson'
 ...
